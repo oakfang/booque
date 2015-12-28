@@ -89,7 +89,12 @@ export default React.createClass(Object.assign({
     if (this.state.detailed) {
       shelfView = (
         <div>
-          <DetailedShelf books={this.state.books} onBooksUpdate={this.updateBooks} onBookData={this.onBookData} onSelect={this.onSelect} onDelete={this.onDelete} />
+          <DetailedShelf books={this.state.books} 
+                         selected={this.state.selected}
+                         onBooksUpdate={this.updateBooks} 
+                         onBookData={this.onBookData} 
+                         onSelect={this.onSelect} 
+                         onDelete={this.onDelete} />
           {this.state.selected ? <BookDetails book={this.state.books[_.findIndex(this.state.books, 'isbn', this.state.selected)]} isbn={this.state.selected} onDelete={this.onDelete} /> : null}
         </div>
       );

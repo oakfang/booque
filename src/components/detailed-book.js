@@ -84,18 +84,20 @@ export default DropTarget('card', bookTarget, connect => ({
     render() {
         if (this.state.loading) return <Card style={{width: 50, display: 'inline-block', margin: '5px 5px'}}><CardTitle title="..." /></Card>;
         else {
-            const { text, isDragging, connectDragSource, connectDropTarget } = this.props;
+            const { isDragging, connectDragSource, connectDropTarget, isSelected } = this.props;
             const opacity = isDragging ? 0 : 1;
-            return connectDragSource(connectDropTarget(
-                <div style={{width: 50, display: 'inline-block', margin: '5px 5px', opacity: opacity}} 
-                     onClick={() => this.props.onSelect(this.props.isbn)}>
-                    <Card>
-                      <CardMedia>
-                          <img src={this.state.thumbnail} />
-                      </CardMedia>
-                    </Card>
-                </div>
-            ));
+            const filter = isSelected ? 'grayscale(100%)' : 'none';
+            const view = (
+              <div style={{width: 50, display: 'inline-block', margin: '5px 5px', opacity: opacity, cursor: 'pointer', WebkitFilter: filter}} 
+                   onClick={() => this.props.onSelect(this.props.isbn)}>
+                  <Card>
+                    <CardMedia>
+                        <img src={this.state.thumbnail} />
+                    </CardMedia>
+                  </Card>
+              </div>
+            );
+            return connectDragSource(connectDropTarget(view));
         }
     }
 })));

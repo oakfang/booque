@@ -13,7 +13,8 @@ function formatAuthors(authors) {
 
 export default React.createClass({
     render() {
-        let rating = <Avatar style={{color:'white'}}>{this.props.book.averageRating}</Avatar>;
+        let rating = (this.props.book.averageRating && this.props.book.title.length <= 30) ? 
+                        <Avatar style={{color:'white'}}>{this.props.book.averageRating}</Avatar> : null;
         let header = <CardHeader title={this.props.book.title} subtitle={formatAuthors(this.props.book.authors)} avatar={rating} />;
         return (
             <Card style={{width: '300px', display: 'inline-block'}}>

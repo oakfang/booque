@@ -32,13 +32,13 @@ export default DragDropContext(HTML5Backend)(DropTarget('card', bookTarget, conn
     render() {
         const { connectDropTarget } = this.props;
         const { books } = this.props;
-
         return connectDropTarget(
           <div style={{display: 'inline-block', width: 'calc(100% - 300px)', verticalAlign: 'top'}}>
             {books.map(book => book.fetch ? 
               (<Book key={book.isbn} 
                      isbn={book.isbn} 
                      fetch={book.fetch} 
+                     isSelected={this.props.selected == book.isbn}
                      moveBook={this.moveBook} 
                      findBook={this.findBook} 
                      onSelect={this.props.onSelect}
@@ -47,6 +47,7 @@ export default DragDropContext(HTML5Backend)(DropTarget('card', bookTarget, conn
               (<Book key={book.isbn} 
                      isbn={book.isbn} 
                      fetch={book.fetch}
+                     isSelected={this.props.selected == book.isbn}
                      thumbnail={book.imageLinks.smallThumbnail}
                      moveBook={this.moveBook} 
                      findBook={this.findBook} 
