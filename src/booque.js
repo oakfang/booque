@@ -11,7 +11,10 @@ export default function getBook(isbn) {
             response.on('error', reject);
             let chunks = [];
             response.on('data', chunks.push.bind(chunks));
-            response.on('end', () => resolve(JSON.parse(chunks.join('')).items[0].volumeInfo));
+            response.on('end', () => {
+                let responseObject = JSON.parse(chunks.join(''));
+                responseObject.items ? resolve(responseObject.items[0].volumeInfo) : reject();
+            });
         });
     });    
 }

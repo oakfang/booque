@@ -9,9 +9,13 @@ import ThemeManager from 'material-ui/lib/styles/theme-manager';
 
 import TextField from 'material-ui/lib/text-field';
 import RaisedButton from 'material-ui/lib/raised-button';
+import LinearProgress from 'material-ui/lib/linear-progress';
+import Toggle from 'material-ui/lib/toggle';
 
 import queue from '../queue-events';
 import Shelf from './shelf';
+import DetailedShelf from './detailed-shelf';
+import BookDetails from './book-details';
 
 const darkThemeMixin = {
   childContextTypes : {
@@ -29,7 +33,9 @@ export default React.createClass(Object.assign({
     return {
       books: [],
       newIsbn: '', 
-      saving: false
+      saving: false,
+      detailed: false,
+      selected: null
     };
   },
   componentDidMount() {
@@ -51,6 +57,7 @@ export default React.createClass(Object.assign({
     queue.emit('change', this.state.books);
   },
   onAddBook() {
+    if (!this._canAddNewISBN()) return;
     let isbn = this.state.newIsbn;
     this.refs.isbn.setValue('');
     this.setState({
@@ -63,24 +70,47 @@ export default React.createClass(Object.assign({
     let index = _.findIndex(this.state.books, 'isbn', isbn);
     let {books} = this.state;
     books.splice(index, 1);
-    this.setState({books});
+    this.setState({
+      books,
+      selected: (this.state.selected === isbn) ? null : this.state.selected
+    });
     queue.emit('change', this.state.books);
+  },
+  onSelect(isbn) {
+    let index = _.findIndex(this.state.books, 'isbn', isbn);
+    this.setState({selected: isbn});
   },
   _canAddNewISBN() {
     let isbn = this.state.newIsbn;
     return isbn.length === 10 || isbn.length === 13;
   },
-  render() {    
+  render() {
+    var shelfView;
+    if (this.state.detailed) {
+      shelfView = (
+        <div>
+          <DetailedShelf books={this.state.books} onBooksUpdate={this.updateBooks} onBookData={this.onBookData} onSelect={this.onSelect} onDelete={this.onDelete} />
+          {this.state.selected ? <BookDetails book={this.state.books[_.findIndex(this.state.books, 'isbn', this.state.selected)]} isbn={this.state.selected} onDelete={this.onDelete} /> : null}
+        </div>
+      );
+    } else {
+      shelfView = <Shelf books={this.state.books} onBooksUpdate={this.updateBooks} onBookData={this.onBookData} onDelete={this.onDelete} />;
+    }
     return (
       <div>
         <TextField hintText="ISBN # (10 or 13 digits)" 
-                   floatingLabelText="Add new book" 
-                   ref="isbn" onChange={() => this.setState({newIsbn: this.refs.isbn.getValue()})}/>
+                   floatingLabelText="Add new book"
+                   ref="isbn" 
+                   onChange={() => this.setState({newIsbn: this.refs.isbn.getValue()})}
+                   onEnterKeyDown={this.onAddBook}/>
         <RaisedButton style={{margin: '0px 15px'}} label="Add" labelColor="white" secondary={true} 
                       disabled={!this._canAddNewISBN()} 
                       onClick={this.onAddBook} />
-        <Shelf books={this.state.books} onBooksUpdate={this.updateBooks} onBookData={this.onBookData} onDelete={this.onDelete} />
-        { this.state.saving ? <p>Saving...</p> : null }
+        <div style={{position: 'absolute', top: 20, right: 50}}>
+          <Toggle label="Detailed View" ref="detailedView" onToggle={() => this.setState({detailed: this.refs.detailedView.isToggled()})}/>
+        </div>
+        { this.state.saving ? <LinearProgress mode="indeterminate" /> : null }
+        { shelfView}        
       </div>
     );
   }

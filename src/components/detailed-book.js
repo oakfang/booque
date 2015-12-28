@@ -66,10 +66,7 @@ export default DropTarget('card', bookTarget, connect => ({
             .then(book => {
                 this.setState({
                     loading: false,
-                    title: book.title,
-                    authors: formatAuthors(book.authors),
-                    thumbnail: book.imageLinks.thumbnail,
-                    description: book.description
+                    thumbnail: book.imageLinks.smallThumbnail
                 });
                 return book;
             })
@@ -77,10 +74,7 @@ export default DropTarget('card', bookTarget, connect => ({
             .catch(() => this.props.onDelete(this.props.isbn));
         } else {
           this.setState({
-            title: this.props.title,
-            authors: formatAuthors(this.props.authors),
-            thumbnail: this.props.thumbnail,
-            description: this.props.description
+            thumbnail: this.props.thumbnail
           });
         }
     },
@@ -88,24 +82,18 @@ export default DropTarget('card', bookTarget, connect => ({
       this.setState({marked: true});
     },
     render() {
-        if (this.state.loading) return <Card style={{width: 200, display: 'inline-block', margin: '5px 10px'}}><CardTitle title="Loading..." /></Card>;
+        if (this.state.loading) return <Card style={{width: 50, display: 'inline-block', margin: '5px 5px'}}><CardTitle title="..." /></Card>;
         else {
             const { text, isDragging, connectDragSource, connectDropTarget } = this.props;
             const opacity = isDragging ? 0 : 1;
             return connectDragSource(connectDropTarget(
-                <div style={{width: 200, display: 'inline-block', margin: '5px 10px', opacity: opacity}} 
-                     onDoubleClick={this.markForDelete} onClick={() => this.setState({marked: false})}>
-                    {!this.state.marked ?
-                      <Card>
-                        <CardMedia overlay={<CardTitle title={this.state.title} subtitle={this.state.authors} />}>
-                            <img src={this.state.thumbnail} />
-                        </CardMedia>
-                      </Card>:
-                      <Card style={{background: 'rgba(219, 68, 55, 0.5)'}}>
-                        <CardTitle title={this.state.title} subtitle={this.state.authors} />
-                        <FlatButton label="Delete?" onClick={() => this.props.onDelete(this.props.isbn)} />
-                      </Card>
-                    }
+                <div style={{width: 50, display: 'inline-block', margin: '5px 5px', opacity: opacity}} 
+                     onClick={() => this.props.onSelect(this.props.isbn)}>
+                    <Card>
+                      <CardMedia>
+                          <img src={this.state.thumbnail} />
+                      </CardMedia>
+                    </Card>
                 </div>
             ));
         }
