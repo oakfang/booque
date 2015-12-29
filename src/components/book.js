@@ -16,17 +16,16 @@ function formatAuthors(authors) {
 const bookSource = {
   beginDrag(props) {
     return {
-      isbn: props.isbn,
-      originalIndex: props.findBook(props.isbn).index
+      isbn: props.isbn
     };
   },
 
   endDrag(props, monitor) {
-    const { isbn: droppedId, originalIndex } = monitor.getItem();
+    const { isbn: droppedId } = monitor.getItem();
     const didDrop = monitor.didDrop();
 
     if (!didDrop) {
-      props.moveBook(droppedId, originalIndex);
+      props.moveBook(droppedId, droppedId);
     }
   }
 };
@@ -41,8 +40,7 @@ const bookTarget = {
     const { isbn: overId } = props;
 
     if (draggedId !== overId) {
-      const { index: overIndex } = props.findBook(overId);
-      props.moveBook(draggedId, overIndex);
+      props.moveBook(draggedId, overId);
     }
   }
 };
@@ -53,56 +51,28 @@ export default DropTarget('card', bookTarget, connect => ({
   connectDragSource: connect.dragSource(),
   isDragging: monitor.isDragging()
 }))(React.createClass({
-    getInitialState() {
-        return {
-            loading: false,
-            marked: false
-        }
-    },
     componentDidMount() {
         if (this.props.isbn && this.props.fetch) {
-            this.setState({loading: true});
             getBook(this.props.isbn)
-            .then(book => {
-                this.setState({
-                    loading: false,
-                    title: book.title,
-                    authors: formatAuthors(book.authors),
-                    thumbnail: book.imageLinks.thumbnail,
-                    description: book.description
-                });
-                return book;
-            })
             .then(book => this.props.onBookData(this.props.isbn, book))
-            .catch(() => this.props.onDelete(this.props.isbn));
-        } else {
-          this.setState({
-            title: this.props.title,
-            authors: formatAuthors(this.props.authors),
-            thumbnail: this.props.thumbnail,
-            description: this.props.description
-          });
+            .catch(err => console.error(err) || this.props.onDelete(this.props.isbn));
         }
     },
-    markForDelete() {
-      this.setState({marked: true});
-    },
     render() {
-        if (this.state.loading) return <Card style={{width: 200, display: 'inline-block', margin: '5px 10px'}}><CardTitle title="Loading..." /></Card>;
+        if (this.props.fetch) return <Card style={{width: 200, display: 'inline-block', margin: '5px 10px'}}><CardTitle title="Loading..." /></Card>;
         else {
-            const { text, isDragging, connectDragSource, connectDropTarget } = this.props;
+            const { isDragging, connectDragSource, connectDropTarget } = this.props;
             const opacity = isDragging ? 0 : 1;
             return connectDragSource(connectDropTarget(
-                <div style={{width: 200, display: 'inline-block', margin: '5px 10px', opacity: opacity}} 
-                     onDoubleClick={this.markForDelete} onClick={() => this.setState({marked: false})}>
-                    {!this.state.marked ?
-                      <Card>
-                        <CardMedia overlay={<CardTitle title={this.state.title} subtitle={this.state.authors} />}>
-                            <img src={this.state.thumbnail} />
+                <div style={{width: 200, display: 'inline-block', margin: '5px 10px', opacity: opacity}}>
+                    {!this.props.isMarked ?
+                      <Card onDoubleClick={() => this.props.onMark(this.props.isbn)}>
+                        <CardMedia overlay={<CardTitle title={this.props.title} subtitle={formatAuthors(this.props.authors)} />}>
+                            <img src={this.props.thumbnail} />
                         </CardMedia>
                       </Card>:
-                      <Card style={{background: 'rgba(219, 68, 55, 0.5)'}}>
-                        <CardTitle title={this.state.title} subtitle={this.state.authors} />
+                      <Card onClick={() => this.props.onMark(this.props.isbn)} style={{background: 'rgba(219, 68, 55, 0.5)'}}>
+                        <CardTitle title={this.props.title} subtitle={formatAuthors(this.props.authors)} />
                         <FlatButton label="Delete?" onClick={() => this.props.onDelete(this.props.isbn)} />
                       </Card>
                     }

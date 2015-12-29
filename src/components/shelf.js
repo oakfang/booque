@@ -1,4 +1,5 @@
 import React from 'react';
+import {includes} from 'lodash';
 import Book from './book';
 import { DropTarget, DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
@@ -11,27 +12,8 @@ const bookTarget = {
 export default DragDropContext(HTML5Backend)(DropTarget('card', bookTarget, connect => ({
   connectDropTarget: connect.dropTarget()
 }))(React.createClass({
-    moveBook(id, atIndex) {
-        const { book, index } = this.findBook(id);
-        this.props.onBooksUpdate({
-            $splice: [
-                [index, 1],
-                [atIndex, 0, book]
-            ]
-        });
-    },
-    findBook(id) {
-        const { books } = this.props;
-        const book = books.filter(c => c.isbn === id)[0];
-
-        return {
-          book,
-          index: books.indexOf(book)
-        };
-    },
     render() {
-        const { connectDropTarget } = this.props;
-        const { books } = this.props;
+        const { connectDropTarget, books } = this.props;
 
         return connectDropTarget(
           <div>
@@ -39,21 +21,23 @@ export default DragDropContext(HTML5Backend)(DropTarget('card', bookTarget, conn
               (<Book key={book.isbn} 
                      isbn={book.isbn} 
                      fetch={book.fetch} 
-                     moveBook={this.moveBook} 
+                     moveBook={this.props.onMove} 
                      findBook={this.findBook} 
                      onDelete={this.props.onDelete}
-                     onBookData={this.props.onBookData} />) :
+                     isMarked={includes(this.props.marked, book.isbn)}
+                     onMark={this.props.onMark}
+                     onBookData={this.props.onData} />) :
               (<Book key={book.isbn} 
                      isbn={book.isbn} 
                      fetch={book.fetch} 
                      title={book.title}
                      authors={book.authors}
                      thumbnail={book.imageLinks.thumbnail}
-                     description={book.description}
-                     moveBook={this.moveBook} 
-                     findBook={this.findBook} 
+                     moveBook={this.props.onMove}
+                     isMarked={includes(this.props.marked, book.isbn)}
+                     onMark={this.props.onMark}
                      onDelete={this.props.onDelete}
-                     onBookData={this.props.onBookData} />)
+                     onBookData={this.props.onData} />)
               )}
           </div>
         );

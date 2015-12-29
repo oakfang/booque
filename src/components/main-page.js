@@ -12,10 +12,23 @@ import RaisedButton from 'material-ui/lib/raised-button';
 import LinearProgress from 'material-ui/lib/linear-progress';
 import Toggle from 'material-ui/lib/toggle';
 
-import queue from '../queue-events';
 import Shelf from './shelf';
 import DetailedShelf from './detailed-shelf';
 import BookDetails from './book-details';
+
+import {mainPageSelector} from '../selectors';
+import { connect } from 'react-redux';
+import {
+  addBook,
+  deleteBook,
+  loadBooks,
+  selectBook,
+  changeIsbn,
+  toggleDetailedView,
+  moveBook,
+  markBook,
+  updateBookData
+} from '../callers';
 
 const darkThemeMixin = {
   childContextTypes : {
@@ -28,95 +41,75 @@ const darkThemeMixin = {
   }
 };
 
-export default React.createClass(Object.assign({
-  getInitialState() {
-    return {
-      books: [],
-      newIsbn: '', 
-      saving: false,
-      detailed: false,
-      selected: null
-    };
-  },
+export default connect(mainPageSelector)(React.createClass(Object.assign({
   componentDidMount() {
-    queue.on('change', () => this.setState({saving: true}));
-    queue.on('saved', () => this.setState({saving: false}));
-    fs.readFile('./queue.json', {encoding: 'utf8'}, (err, data) => this.setState({books: JSON.parse(data)}));
-  },
-  updateBooks(updater) {
-    this.setState(update(this.state, {
-      books: updater
-    }));
-    queue.emit('change', this.state.books);
-  },
-  onBookData(isbn, data) {
-    let index = _.findIndex(this.state.books, 'isbn', isbn);
-    let {books} = this.state;
-    books[index] = Object.assign({isbn, fetch: false}, data);
-    this.setState({books});
-    queue.emit('change', this.state.books);
+    const {dispatch} = this.props;
+    fs.readFile('./queue.json', 
+                {encoding: 'utf8'}, 
+                (err, data) => dispatch(loadBooks(JSON.parse(data))));
   },
   onAddBook() {
     if (!this._canAddNewISBN()) return;
-    let isbn = this.state.newIsbn;
+    const {newIsbn: isbn, dispatch} = this.props;
     this.refs.isbn.setValue('');
-    this.setState({
-      newIsbn: '',
-      books: this.state.books.concat([{isbn, fetch: true}])
-    });
-    queue.emit('change', this.state.books);
+    dispatch(addBook(isbn));
   },
   onDelete(isbn) {
-    let index = _.findIndex(this.state.books, 'isbn', isbn);
-    let {books} = this.state;
-    books.splice(index, 1);
-    this.setState({
-      books,
-      selected: (this.state.selected === isbn) ? null : this.state.selected
-    });
-    queue.emit('change', this.state.books);
+    this.props.dispatch(deleteBook(isbn));
   },
   onSelect(isbn) {
-    let index = _.findIndex(this.state.books, 'isbn', isbn);
-    this.setState({selected: isbn});
+    this.props.dispatch(selectBook(isbn));
+  },
+  onMove(isbn, toIndex) {
+    this.props.dispatch(moveBook(isbn, toIndex));
+  },
+  onData(isbn, data) {
+    this.props.dispatch(updateBookData(isbn, data));
+  },
+  onMark(isbn) {
+    this.props.dispatch(markBook(isbn));
   },
   _canAddNewISBN() {
-    let isbn = this.state.newIsbn;
+    let isbn = this.props.newIsbn;
     return isbn.length === 10 || isbn.length === 13;
   },
   render() {
     var shelfView;
-    if (this.state.detailed) {
+    if (this.props.detailed) {
       shelfView = (
         <div>
-          <DetailedShelf books={this.state.books} 
-                         selected={this.state.selected}
-                         onBooksUpdate={this.updateBooks} 
-                         onBookData={this.onBookData} 
-                         onSelect={this.onSelect} 
-                         onDelete={this.onDelete} />
-          {this.state.selected ? <BookDetails book={this.state.books[_.findIndex(this.state.books, 'isbn', this.state.selected)]} isbn={this.state.selected} onDelete={this.onDelete} /> : null}
+          <DetailedShelf books={this.props.books} 
+                         selected={this.props.selected}
+                         onSelect={this.onSelect}
+                         onData={this.onData}
+                         onMove={this.onMove} />
+          {this.props.selected ? <BookDetails book={this.props.books[_.findIndex(this.props.books, 'isbn', this.props.selected)]} isbn={this.props.selected} onDelete={this.onDelete} /> : null}
         </div>
       );
     } else {
-      shelfView = <Shelf books={this.state.books} onBooksUpdate={this.updateBooks} onBookData={this.onBookData} onDelete={this.onDelete} />;
+      shelfView = <Shelf books={this.props.books} 
+                         onDelete={this.onDelete}
+                         onData={this.onData}
+                         onMove={this.onMove}
+                         marked={this.props.marked}
+                         onMark={this.onMark} />;
     }
     return (
       <div>
         <TextField hintText="ISBN # (10 or 13 digits)" 
                    floatingLabelText="Add new book"
                    ref="isbn" 
-                   onChange={() => this.setState({newIsbn: this.refs.isbn.getValue()})}
+                   onChange={() => this.props.dispatch(changeIsbn(this.refs.isbn.getValue()))}
                    onEnterKeyDown={this.onAddBook}/>
         <RaisedButton style={{margin: '0px 15px'}} label="Add" labelColor="white" secondary={true} 
                       disabled={!this._canAddNewISBN()} 
                       onClick={this.onAddBook} />
         <div style={{position: 'absolute', top: 20, right: 50}}>
-          <Toggle label="Detailed View" ref="detailedView" onToggle={() => this.setState({detailed: this.refs.detailedView.isToggled()})}/>
+          <Toggle label="Detailed View" ref="detailedView" onToggle={() => this.props.dispatch(toggleDetailedView())}/>
         </div>
-        { this.state.saving ? <LinearProgress mode="indeterminate" /> : null }
+        { this.props.saving ? <LinearProgress mode="indeterminate" /> : null }
         { shelfView}        
       </div>
     );
   }
-}, darkThemeMixin));
+}, darkThemeMixin)));

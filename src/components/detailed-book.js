@@ -6,7 +6,6 @@ import { DragSource, DropTarget } from 'react-dnd';
 import Card from 'material-ui/lib/card/card';
 import CardMedia from 'material-ui/lib/card/card-media';
 import CardTitle from 'material-ui/lib/card/card-title';
-import FlatButton from 'material-ui/lib/flat-button';
 
 function formatAuthors(authors) {
     if (authors.length) return authors[0];
@@ -16,17 +15,16 @@ function formatAuthors(authors) {
 const bookSource = {
   beginDrag(props) {
     return {
-      isbn: props.isbn,
-      originalIndex: props.findBook(props.isbn).index
+      isbn: props.isbn
     };
   },
 
   endDrag(props, monitor) {
-    const { isbn: droppedId, originalIndex } = monitor.getItem();
+    const { isbn: droppedId } = monitor.getItem();
     const didDrop = monitor.didDrop();
 
     if (!didDrop) {
-      props.moveBook(droppedId, originalIndex);
+      props.moveBook(droppedId, droppedId);
     }
   }
 };
@@ -41,8 +39,7 @@ const bookTarget = {
     const { isbn: overId } = props;
 
     if (draggedId !== overId) {
-      const { index: overIndex } = props.findBook(overId);
-      props.moveBook(draggedId, overIndex);
+      props.moveBook(draggedId, overId);
     }
   }
 };
@@ -53,36 +50,15 @@ export default DropTarget('card', bookTarget, connect => ({
   connectDragSource: connect.dragSource(),
   isDragging: monitor.isDragging()
 }))(React.createClass({
-    getInitialState() {
-        return {
-            loading: false,
-            marked: false
-        }
-    },
     componentDidMount() {
         if (this.props.isbn && this.props.fetch) {
-            this.setState({loading: true});
             getBook(this.props.isbn)
-            .then(book => {
-                this.setState({
-                    loading: false,
-                    thumbnail: book.imageLinks.smallThumbnail
-                });
-                return book;
-            })
             .then(book => this.props.onBookData(this.props.isbn, book))
             .catch(() => this.props.onDelete(this.props.isbn));
-        } else {
-          this.setState({
-            thumbnail: this.props.thumbnail
-          });
         }
     },
-    markForDelete() {
-      this.setState({marked: true});
-    },
     render() {
-        if (this.state.loading) return <Card style={{width: 50, display: 'inline-block', margin: '5px 5px'}}><CardTitle title="..." /></Card>;
+        if (this.props.loading) return <Card style={{width: 50, display: 'inline-block', margin: '5px 5px'}}><CardTitle title="..." /></Card>;
         else {
             const { isDragging, connectDragSource, connectDropTarget, isSelected } = this.props;
             const opacity = isDragging ? 0 : 1;
@@ -92,7 +68,7 @@ export default DropTarget('card', bookTarget, connect => ({
                    onClick={() => this.props.onSelect(this.props.isbn)}>
                   <Card>
                     <CardMedia>
-                        <img src={this.state.thumbnail} />
+                        <img src={this.props.thumbnail} />
                     </CardMedia>
                   </Card>
               </div>
