@@ -58,7 +58,7 @@ export default DropTarget('card', bookTarget, connect => ({
         }
     },
     render() {
-        if (this.props.loading) return <Card style={{width: 50, display: 'inline-block', margin: '5px 5px'}}><CardTitle title="..." /></Card>;
+        if (this.props.fetch) return <Card style={{width: 50, display: 'inline-block', margin: '5px 5px'}}><CardTitle title="..." /></Card>;
         else {
             const { isDragging, connectDragSource, connectDropTarget, isSelected } = this.props;
             const opacity = isDragging ? 0 : 1;
