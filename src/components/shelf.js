@@ -12,33 +12,29 @@ const bookTarget = {
 export default DragDropContext(HTML5Backend)(DropTarget('card', bookTarget, connect => ({
   connectDropTarget: connect.dropTarget()
 }))(React.createClass({
+    getBook(book) {
+      return <Book key={book.isbn}
+                   isbn={book.isbn}
+                   fetch={book.fetch}
+                   book={book}
+                   isSelected={this.props.selected == book.isbn}
+                   isDetailed={this.props.isDetailed}
+                   isMarked={includes(this.props.marked, book.isbn)}
+                   onMark={this.props.onMark}
+                   moveBook={this.props.onMove}
+                   onSelect={this.props.onSelect}
+                   onBookData={this.props.onData}/>
+    },
     render() {
-        const { connectDropTarget, books } = this.props;
-
+        const { connectDropTarget, books, isDetailed } = this.props;
+        const style = isDetailed ? {
+          display: 'inline-block', 
+          width: 'calc(100% - 300px)', 
+          verticalAlign: 'top'
+        } : {};
         return connectDropTarget(
-          <div>
-            {books.map(book => book.fetch ? 
-              (<Book key={book.isbn} 
-                     isbn={book.isbn} 
-                     fetch={book.fetch} 
-                     moveBook={this.props.onMove} 
-                     findBook={this.findBook} 
-                     onDelete={this.props.onDelete}
-                     isMarked={includes(this.props.marked, book.isbn)}
-                     onMark={this.props.onMark}
-                     onBookData={this.props.onData} />) :
-              (<Book key={book.isbn} 
-                     isbn={book.isbn} 
-                     fetch={book.fetch} 
-                     title={book.title}
-                     authors={book.authors}
-                     thumbnail={book.imageLinks.thumbnail}
-                     moveBook={this.props.onMove}
-                     isMarked={includes(this.props.marked, book.isbn)}
-                     onMark={this.props.onMark}
-                     onDelete={this.props.onDelete}
-                     onBookData={this.props.onData} />)
-              )}
+          <div style={style}>
+            {books.map(this.getBook)}
           </div>
         );
     }

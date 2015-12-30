@@ -13,7 +13,6 @@ import LinearProgress from 'material-ui/lib/linear-progress';
 import Toggle from 'material-ui/lib/toggle';
 
 import Shelf from './shelf';
-import DetailedShelf from './detailed-shelf';
 import BookDetails from './book-details';
 
 import {mainPageSelector} from '../selectors';
@@ -74,26 +73,6 @@ export default connect(mainPageSelector)(React.createClass(Object.assign({
     return isbn.length === 10 || isbn.length === 13;
   },
   render() {
-    var shelfView;
-    if (this.props.detailed) {
-      shelfView = (
-        <div>
-          <DetailedShelf books={this.props.books} 
-                         selected={this.props.selected}
-                         onSelect={this.onSelect}
-                         onData={this.onData}
-                         onMove={this.onMove} />
-          {this.props.selected ? <BookDetails book={this.props.books[_.findIndex(this.props.books, 'isbn', this.props.selected)]} isbn={this.props.selected} onDelete={this.onDelete} /> : null}
-        </div>
-      );
-    } else {
-      shelfView = <Shelf books={this.props.books} 
-                         onDelete={this.onDelete}
-                         onData={this.onData}
-                         onMove={this.onMove}
-                         marked={this.props.marked}
-                         onMark={this.onMark} />;
-    }
     return (
       <div>
         <TextField hintText="ISBN # (10 or 13 digits)" 
@@ -108,7 +87,17 @@ export default connect(mainPageSelector)(React.createClass(Object.assign({
           <Toggle label="Detailed View" ref="detailedView" onToggle={() => this.props.dispatch(toggleDetailedView())}/>
         </div>
         { this.props.saving ? <LinearProgress mode="indeterminate" /> : null }
-        { shelfView}        
+        <div>
+          <Shelf books={this.props.books} 
+                 selected={this.props.selected}
+                 isDetailed={this.props.detailed}
+                 onSelect={this.onSelect}
+                 onData={this.onData}
+                 onMove={this.onMove}
+                 marked={this.props.marked}
+                 onMark={this.onMark} />
+          {this.props.selected && this.props.detailed ? <BookDetails book={this.props.books[_.findIndex(this.props.books, 'isbn', this.props.selected)]} isbn={this.props.selected} onDelete={this.onDelete} /> : null}
+        </div>    
       </div>
     );
   }
