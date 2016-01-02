@@ -3,7 +3,8 @@ import {debounce} from 'lodash';
 import { createStore, applyMiddleware } from 'redux';
 import app from './reducers';
 import actions from './actions';
-import {toggleCurrentlySaving} from './callers';
+import getBook from './booque';
+import {toggleCurrentlySaving, updateBookData, deleteBook} from './callers';
 
 const saveBooks = debounce(store => {
     let books = store.getState().books;
@@ -26,6 +27,19 @@ const persistChanges = store => next => action => {
     }
 };
 
+const fetchBooksData = store => next => action => {
+    let result = next(action);
+    switch(action.type) {
+        case actions.ADD_BOOK:
+            let isbn = action.payload;
+            getBook(isbn)
+            .then(book => store.dispatch(updateBookData(isbn, book)))
+            .catch(() => store.dispatch(deleteBook(isbn)));
+        default:
+            return result;
+    }
+};
+
 const logger = store => next => action => {
   console.group(action.type);
   console.info('dispatching', action);
@@ -34,4 +48,4 @@ const logger = store => next => action => {
   return result;
 };
 
-export default applyMiddleware(logger, persistChanges)(createStore)(app);
+export default applyMiddleware(logger, persistChanges, fetchBooksData)(createStore)(app);

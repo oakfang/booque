@@ -25,8 +25,7 @@ import {
   changeIsbn,
   toggleDetailedView,
   moveBook,
-  markBook,
-  updateBookData
+  markBook
 } from '../callers';
 
 const darkThemeMixin = {
@@ -62,9 +61,6 @@ export default connect(mainPageSelector)(React.createClass(Object.assign({
   onMove(isbn, toIndex) {
     this.props.dispatch(moveBook(isbn, toIndex));
   },
-  onData(isbn, data) {
-    this.props.dispatch(updateBookData(isbn, data));
-  },
   onMark(isbn) {
     this.props.dispatch(markBook(isbn));
   },
@@ -92,11 +88,15 @@ export default connect(mainPageSelector)(React.createClass(Object.assign({
                  selected={this.props.selected}
                  isDetailed={this.props.detailed}
                  onSelect={this.onSelect}
-                 onData={this.onData}
                  onMove={this.onMove}
+                 onDelete={this.onDelete}
                  marked={this.props.marked}
                  onMark={this.onMark} />
-          {this.props.selected && this.props.detailed ? <BookDetails book={this.props.books[_.findIndex(this.props.books, 'isbn', this.props.selected)]} isbn={this.props.selected} onDelete={this.onDelete} /> : null}
+          {this.props.selected && this.props.detailed ? 
+            <BookDetails book={this.props.books[_.findIndex(this.props.books, 'isbn', this.props.selected)]} 
+                         isbn={this.props.selected} 
+                         onDelete={this.onDelete} />
+           : null}
         </div>    
       </div>
     );

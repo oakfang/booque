@@ -9,33 +9,30 @@ const bookTarget = {
   }
 };
 
+
+const Shelf = ({books, connectDropTarget, selected, isDetailed, marked, onMark, onDelete, onMove, onSelect}) => {
+  const style = isDetailed ? {
+    display: 'inline-block', 
+    width: 'calc(100% - 300px)', 
+    verticalAlign: 'top'
+  } : {};
+  return connectDropTarget(
+    <div style={style}>
+      {books.map(book => <Book key={book.isbn}
+                               isbn={book.isbn}
+                               fetch={book.fetch}
+                               book={book}
+                               isSelected={selected == book.isbn}
+                               isDetailed={isDetailed}
+                               isMarked={includes(marked, book.isbn)}
+                               onMark={onMark}
+                               onDelete={onDelete}
+                               moveBook={onMove}
+                               onSelect={onSelect}/>)}
+    </div>
+  );
+};
+
 export default DragDropContext(HTML5Backend)(DropTarget('card', bookTarget, connect => ({
   connectDropTarget: connect.dropTarget()
-}))(React.createClass({
-    getBook(book) {
-      return <Book key={book.isbn}
-                   isbn={book.isbn}
-                   fetch={book.fetch}
-                   book={book}
-                   isSelected={this.props.selected == book.isbn}
-                   isDetailed={this.props.isDetailed}
-                   isMarked={includes(this.props.marked, book.isbn)}
-                   onMark={this.props.onMark}
-                   moveBook={this.props.onMove}
-                   onSelect={this.props.onSelect}
-                   onBookData={this.props.onData}/>
-    },
-    render() {
-        const { connectDropTarget, books, isDetailed } = this.props;
-        const style = isDetailed ? {
-          display: 'inline-block', 
-          width: 'calc(100% - 300px)', 
-          verticalAlign: 'top'
-        } : {};
-        return connectDropTarget(
-          <div style={style}>
-            {books.map(this.getBook)}
-          </div>
-        );
-    }
-})));
+}))(Shelf));

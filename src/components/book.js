@@ -1,5 +1,4 @@
 import React from 'react';
-import getBook from '../booque';
 
 import { DragSource, DropTarget } from 'react-dnd';
 
@@ -45,57 +44,48 @@ const bookTarget = {
   }
 };
 
+const innerCard = ({book, isDetailed, onSelect, isbn, isMarked, onMark, onDelete}) => {
+  if (isDetailed) {
+        return (<Card onClick={() => onSelect(isbn)}>
+                  <CardMedia>
+                      <img src={book.imageLinks.smallThumbnail} />
+                  </CardMedia>
+                </Card>);
+    } else if (isMarked) {
+        return (<Card onClick={() => onMark(isbn)} style={{background: 'rgba(219, 68, 55, 0.5)'}}>
+                   <CardTitle title={book.title} subtitle={formatAuthors(book.authors)} />
+                   <FlatButton label="Delete?" onClick={() => onDelete(isbn)} />
+                </Card>);
+    } else {
+        return (<Card onDoubleClick={() => onMark(isbn)}>
+                  <CardMedia overlay={<CardTitle title={book.title} subtitle={formatAuthors(book.authors)} />}>
+                      <img src={book.imageLinks.thumbnail} />
+                  </CardMedia>
+                </Card>);
+    }
+};
+
+const Book = ({book, isDetailed, onSelect, isbn, isMarked, onMark, onDelete, fetch, 
+               isSelected, isDragging, connectDragSource, connectDropTarget}) => {
+  const bookStyle = Object.assign({display: 'inline-block'},
+                                     isDetailed ?
+                                        {width: 50, margin: '5px 5px'}:
+                                        {width: 200, margin: '5px 10px'}
+                                    );
+  if (fetch) return <Card style={bookStyle}><CardTitle title="Loading..." /></Card>;
+  const opacity = isDragging ? 0 : 1;
+  const cursor = isDetailed ? 'pointer':'auto';
+  const WebkitFilter = isSelected && isDetailed ? 'grayscale(100%)' : 'none';
+  return connectDragSource(connectDropTarget(
+      <div style={Object.assign({opacity, WebkitFilter, cursor}, bookStyle)}>
+          {innerCard({book, isDetailed, onSelect, isbn, isMarked, onMark, onDelete})}
+      </div>
+  ));
+}
+
 export default DropTarget('card', bookTarget, connect => ({
   connectDropTarget: connect.dropTarget()
 }))(DragSource('card', bookSource, (connect, monitor) => ({
   connectDragSource: connect.dragSource(),
   isDragging: monitor.isDragging()
-}))(React.createClass({
-    componentDidMount() {
-        if (this.props.isbn && this.props.fetch) {
-            getBook(this.props.isbn)
-            .then(book => this.props.onBookData(this.props.isbn, book))
-            .catch(err => console.error(err) || this.props.onDelete(this.props.isbn));
-        }
-    },
-    getCard() {
-      if (this.props.isDetailed) {
-          return (<Card onClick={() => this.props.onSelect(this.props.isbn)}>
-                    <CardMedia>
-                        <img src={this.props.book.imageLinks.smallThumbnail} />
-                    </CardMedia>
-                  </Card>);
-      } else if (this.props.isMarked) {
-          return (<Card onClick={() => this.props.onMark(this.props.isbn)} style={{background: 'rgba(219, 68, 55, 0.5)'}}>
-                     <CardTitle title={this.props.book.title} subtitle={formatAuthors(this.props.book.authors)} />
-                     <FlatButton label="Delete?" onClick={() => this.props.onDelete(this.props.isbn)} />
-                  </Card>);
-      } else {
-          return (<Card onDoubleClick={() => this.props.onMark(this.props.isbn)}>
-                    <CardMedia overlay={<CardTitle title={this.props.book.title} subtitle={formatAuthors(this.props.book.authors)} />}>
-                        <img src={this.props.book.imageLinks.thumbnail} />
-                    </CardMedia>
-                  </Card>);
-      }
-    },
-    render() {
-        const {isDetailed} = this.props;
-        const bookStyle = Object.assign({display: 'inline-block'},
-                                           isDetailed ?
-                                              {width: 50, margin: '5px 5px'}:
-                                              {width: 200, margin: '5px 10px'}
-                                          );
-        if (this.props.fetch) return <Card style={bookStyle}><CardTitle title="Loading..." /></Card>;
-        else {
-            const { isDragging, connectDragSource, connectDropTarget, isSelected } = this.props;
-            const opacity = isDragging ? 0 : 1;
-            const cursor = isDetailed ? 'pointer':'auto';
-            const WebkitFilter = isSelected && isDetailed ? 'grayscale(100%)' : 'none';
-            return connectDragSource(connectDropTarget(
-                <div style={Object.assign({opacity, WebkitFilter, cursor}, bookStyle)}>
-                    {this.getCard()}
-                </div>
-            ));
-        }
-    }
-})));
+}))(Book));
