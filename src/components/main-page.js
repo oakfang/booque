@@ -51,9 +51,8 @@ export default connect(mainPageSelector)(React.createClass(Object.assign({
           <Shelf books={this.props.books}
                  dispatch={this.props.dispatch}
                  selected={this.props.selected}
-                 isDetailed={this.props.detailed}
                  marked={this.props.marked}/>
-          {this.props.selected && this.props.detailed ? 
+          {this.props.selected ? 
             <BookDetails book={this.props.books[_.findIndex(this.props.books, 'isbn', this.props.selected)]} 
                          isbn={this.props.selected} 
                          dispatch={this.props.dispatch}/>

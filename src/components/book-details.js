@@ -5,7 +5,7 @@ import CardMedia from 'material-ui/lib/card/card-media';
 import CardHeader from 'material-ui/lib/card/card-header';
 import CardText from 'material-ui/lib/card/card-text';
 import FlatButton from 'material-ui/lib/flat-button';
-import {deleteBook} from '../callers';
+import {selectBook} from '../callers';
 
 function formatAuthors(authors) {
     if (authors.length) return authors[0];
@@ -22,7 +22,7 @@ export default ({book, isbn, dispatch}) => {
                 <img src={book.imageLinks.thumbnail} />
             </CardMedia>
             <CardText>{book.description}</CardText>
-            <FlatButton label="Remove this book?" onClick={() => dispatch(deleteBook(isbn))} />
+            <FlatButton label="Deselect" onClick={() => dispatch(selectBook())} />
         </Card>
     );
 };

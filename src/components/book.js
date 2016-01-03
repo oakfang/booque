@@ -51,20 +51,14 @@ const bookTarget = {
   }
 };
 
-const innerCard = ({book, isDetailed, dispatch, isbn, isMarked}) => {
-  if (isDetailed) {
-        return (<Card onClick={() => dispatch(selectBook(isbn))}>
-                  <CardMedia>
-                      <img src={book.imageLinks.smallThumbnail} />
-                  </CardMedia>
-                </Card>);
-    } else if (isMarked) {
+const innerCard = ({book, dispatch, isbn, isMarked}) => {
+    if (isMarked) {
         return (<Card onClick={() => dispatch(markBook(isbn))} style={{background: 'rgba(219, 68, 55, 0.5)'}}>
                    <CardTitle title={book.title} subtitle={formatAuthors(book.authors)} />
                    <FlatButton label="Delete?" onClick={() => dispatch(deleteBook(isbn))} />
                 </Card>);
     } else {
-        return (<Card onDoubleClick={() =>dispatch(markBook(isbn))}>
+        return (<Card onDoubleClick={() =>dispatch(markBook(isbn))} onClick={() => dispatch(selectBook(isbn))}>
                   <CardMedia overlay={<CardTitle title={book.title} subtitle={formatAuthors(book.authors)} />}>
                       <img src={book.imageLinks.thumbnail} />
                   </CardMedia>
@@ -72,20 +66,16 @@ const innerCard = ({book, isDetailed, dispatch, isbn, isMarked}) => {
     }
 };
 
-const Book = ({book, isDetailed, dispatch, isbn, isMarked, fetch, 
+const Book = ({book, dispatch, isbn, isMarked, fetch, 
                isSelected, isDragging, connectDragSource, connectDropTarget}) => {
-  const bookStyle = Object.assign({display: 'inline-block'},
-                                     isDetailed ?
-                                        {width: 50, margin: '5px 5px'}:
-                                        {width: 200, margin: '5px 10px'}
-                                    );
+  const bookStyle = {display: 'inline-block', width: 150, margin: '5px 10px'};
   if (fetch) return <Card style={bookStyle}><CardTitle title="Loading..." /></Card>;
   const opacity = isDragging ? 0 : 1;
-  const cursor = isDetailed ? 'pointer':'auto';
-  const WebkitFilter = isSelected && isDetailed ? 'grayscale(100%)' : 'none';
+  const cursor = 'pointer';
+  const WebkitFilter = isSelected ? 'grayscale(100%)' : 'none';
   return connectDragSource(connectDropTarget(
       <div style={Object.assign({opacity, WebkitFilter, cursor}, bookStyle)}>
-          {innerCard({book, isDetailed, dispatch, isbn, isMarked})}
+          {innerCard({book, dispatch, isbn, isMarked})}
       </div>
   ));
 }

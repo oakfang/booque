@@ -2,9 +2,6 @@ import actions from './actions';
 
 const act = (type, payload=null) => ({type, payload});
 
-export const toggleDetailedView = () => 
-    act(actions.TOGGLE_DETAILED_VIEW);
-
 export const toggleCurrentlySaving = isSaving => 
     act(actions.TOGGLE_CURRENTLY_SAVING, isSaving);
 

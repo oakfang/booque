@@ -1,7 +1,6 @@
 import _ from 'lodash';
 
 export default [
-    'TOGGLE_DETAILED_VIEW',
     'TOGGLE_CURRENTLY_SAVING',
     'CHANGE_ISBN',
     'ADD_BOOK',

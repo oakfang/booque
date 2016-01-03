@@ -5,8 +5,7 @@ const selectedBookSelector = state => state.selected;
 const newIsbnSelector = state => state.newIsbn;
 const markedBooksSelector = state => state.markedBooks;
 const viewStateSelector = state => ({
-    saving: state.saving,
-    detailed: state.detailed
+    saving: state.saving
 });
 
 export const mainPageSelector = createSelector(
@@ -15,12 +14,11 @@ export const mainPageSelector = createSelector(
     selectedBookSelector,
     newIsbnSelector,
     markedBooksSelector,
-    ({saving, detailed}, books, selected, newIsbn, marked) => ({
+    ({saving}, books, selected, newIsbn, marked) => ({
         books,
         selected,
         newIsbn,
         saving,
-        detailed,
         marked
     })
 );

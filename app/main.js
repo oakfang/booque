@@ -22,10 +22,11 @@ app.on('window-all-closed', function() {
 app.on('ready', function() {
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: 1150,
-    height: 850,
-    'auto-hide-menu-bar': true
+    autoHideMenuBar: true,
+    minHeight: 500,
+    minWidth: 800
   });
+  mainWindow.maximize();
 
   // and load the index.html of the app.
   mainWindow.loadURL('file://' + __dirname + '../../../index.html');

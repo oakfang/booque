@@ -64,14 +64,6 @@ function currentlySaving(state = false, action) {
     }
 }
 
-function detailedView(state = false, action) {
-    switch (action.type) {
-        case actions.TOGGLE_DETAILED_VIEW:
-            return !state;
-        default: return state;
-    }
-}
-
 function markedBooks(state = [], action) {
     switch (action.type) {
         case actions.DELETE_BOOK:
@@ -90,6 +82,5 @@ export default combineReducers({
     newIsbn,
     markedBooks,
     saving: currentlySaving,
-    detailed: detailedView,
     selected: selectedBook
 });
