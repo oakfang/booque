@@ -34,7 +34,7 @@ const fetchBooksData = store => next => action => {
             let isbn = action.payload;
             getBook(isbn)
             .then(book => store.dispatch(updateBookData(isbn, book)))
-            .catch(() => store.dispatch(deleteBook(isbn)));
+            .catch(err => console.error(err) || store.dispatch(deleteBook(isbn)));
         default:
             return result;
     }

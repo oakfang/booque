@@ -10,7 +10,7 @@ const bookTarget = {
 };
 
 
-const Shelf = ({books, connectDropTarget, selected, isDetailed, marked, onMark, onDelete, onMove, onSelect}) => {
+const Shelf = ({books, connectDropTarget, selected, isDetailed, marked, dispatch}) => {
   const style = isDetailed ? {
     display: 'inline-block', 
     width: 'calc(100% - 300px)', 
@@ -25,10 +25,7 @@ const Shelf = ({books, connectDropTarget, selected, isDetailed, marked, onMark, 
                                isSelected={selected == book.isbn}
                                isDetailed={isDetailed}
                                isMarked={includes(marked, book.isbn)}
-                               onMark={onMark}
-                               onDelete={onDelete}
-                               moveBook={onMove}
-                               onSelect={onSelect}/>)}
+                               dispatch={dispatch}/>)}
     </div>
   );
 };
